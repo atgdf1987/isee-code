@@ -636,12 +636,12 @@ Return ONLY a valid JSON array, no markdown:
 
 Rules: correctIndex=0 always. Blank clearly tests meaning of the word. Return ONLY JSON.`;
 
-  const resp = await fetch('https://api.anthropic.com/v1/messages',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:4000,messages:[{role:'user',content:prompt}]})
+  const resp = await fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ messages: [{ role: 'user', content: prompt }], apiKey })
   });
-  if(!resp.ok){ const e=await resp.json(); throw new Error(e.error?.message||'API error'); }
+  if(!resp.ok){ const e=await resp.json(); throw new Error(e.error||'API error'); }
   const data = await resp.json();
   const text = data.content.filter(c=>c.type==='text').map(c=>c.text).join('');
   const clean = text.replace(/```json\n?/g,'').replace(/```\n?/g,'').trim();

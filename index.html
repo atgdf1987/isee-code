@@ -617,24 +617,67 @@ async function generateQuestions(words, type) {
   const wordList = words.map(w=>`${w.word}: ${w.definition}`).join('\n');
 
   const prompt = type==='synonym' ?
-    `You are an ISEE Upper Level test question writer. Generate ${words.length} Synonym questions.
+    `You are an ISEE Middle/Upper Level test question writer. Generate ${words.length} Synonym questions in EXACT official ISEE format.
 
-Words:
+Words to test:
 ${wordList}
 
+OFFICIAL ISEE SYNONYM FORMAT:
+- Question: "WORD:" (the word in ALL CAPS followed by a colon)
+- 4 answer choices listed alphabetically (A) through (D)
+- The correct answer is always a true synonym or closest in meaning
+- Wrong choices are plausible words from same general category but wrong meaning
+- Choices must be in ALPHABETICAL ORDER
+
 Return ONLY a valid JSON array, no markdown:
-[{"word":"targetWord","question":"TARGETWORD most nearly means","choices":["correct_synonym","wrong1","wrong2","wrong3"],"correctIndex":0,"explanation":"Why this is correct, with context.","synonyms":["syn1","syn2","syn3"],"sentences":["Sentence 1.","Sentence 2.","Sentence 3.","Sentence 4."]}]
+[{
+  "word": "abate",
+  "question": "ABATE:",
+  "choices": ["correct_synonym", "wrong1", "wrong2", "wrong3"],
+  "correctIndex": 0,
+  "explanation": "ABATE means to become less in amount or intensity. The correct answer is [synonym] because it most closely matches this meaning. The other choices are wrong because: [brief reason for each].",
+  "synonyms": ["syn1","syn2","syn3"],
+  "sentences": ["Example sentence 1 using abate naturally.", "Example sentence 2.", "Example sentence 3.", "Example sentence 4."]
+}]
 
-Rules: correctIndex=0 always (shuffled client-side). Wrong choices plausible but wrong. Sentences grade 8-10 level. Return ONLY JSON.` :
-    `You are an ISEE Upper Level test question writer. Generate ${words.length} Sentence Completion questions.
+CRITICAL RULES:
+- correctIndex=0 (the first choice in your array is ALWAYS the correct synonym — it will be shuffled client-side)
+- All 4 choices must be in alphabetical order in your array
+- Wrong choices must be real English words, plausible but clearly not synonyms
+- Sentences should be grade 7-9 level, natural and varied
+- Return ONLY the JSON array, absolutely nothing else` :
+    `You are an ISEE Middle/Upper Level test question writer. Generate ${words.length} Sentence Completion questions in EXACT official ISEE format.
 
-Words:
+Words to test:
 ${wordList}
 
-Return ONLY a valid JSON array, no markdown:
-[{"word":"targetWord","question":"The ______ filled the room, making everyone feel welcome. [answer=targetWord]","choices":["targetWord","wrong1","wrong2","wrong3"],"correctIndex":0,"explanation":"Why targetWord fits this sentence.","synonyms":["syn1","syn2","syn3"],"sentences":["Sentence 1.","Sentence 2.","Sentence 3.","Sentence 4."]}]
+OFFICIAL ISEE SENTENCE COMPLETION FORMAT:
+- The sentence contains "-------" (seven dashes) where the word goes
+- The sentence must provide clear context clues for the correct answer
+- 4 answer choices labeled (A) through (D) in alphabetical order
+- Sentence style examples from real ISEE:
+  * "Myron was able to remain completely -------; he never took sides in any disagreements."
+  * "Because he was annoyed by even the smallest error, Mr. Jones reviewed papers ------- before grading."
+  * "Eric doesn't merely dislike racism; he ------- it."
 
-Rules: correctIndex=0 always. Blank clearly tests meaning of the word. Return ONLY JSON.`;
+Return ONLY a valid JSON array, no markdown:
+[{
+  "word": "abate",
+  "question": "After the storm, the fierce winds began to -------; within an hour, the air was completely still.",
+  "choices": ["correct_answer", "wrong1", "wrong2", "wrong3"],
+  "correctIndex": 0,
+  "explanation": "The correct answer is [word] because [explain how the sentence context points to this word's meaning]. The other choices are wrong because: [brief reason].",
+  "synonyms": ["syn1","syn2","syn3"],
+  "sentences": ["Example sentence 1 using the word naturally.", "Example sentence 2.", "Example sentence 3.", "Example sentence 4."]
+}]
+
+CRITICAL RULES:
+- correctIndex=0 (first choice is always correct — shuffled client-side)
+- All 4 choices must be in alphabetical order
+- Use exactly "-------" (seven dashes) for the blank
+- The sentence context must strongly suggest the correct word's meaning
+- Wrong choices must be real words that do NOT fit the sentence context well
+- Return ONLY the JSON array, absolutely nothing else`;
 
   const resp = await fetch('/api/chat', {
     method: 'POST',

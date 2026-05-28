@@ -641,8 +641,9 @@ Return ONLY a valid JSON array, no markdown:
 }]
 
 CRITICAL RULES:
-- correctIndex=0 (the first choice in your array is ALWAYS the correct synonym — it will be shuffled client-side)
-- All 4 choices must be in alphabetical order in your array
+- Choices MUST be in strict alphabetical order (A, B, C, D)
+- correctIndex must be the actual index (0,1,2,3) of the correct answer in your alphabetically sorted array
+- Example: if correct answer is "diminish" and choices are ["decrease","diminish","expand","weaken"], correctIndex=1
 - Wrong choices must be real English words, plausible but clearly not synonyms
 - Sentences should be grade 7-9 level, natural and varied
 - Return ONLY the JSON array, absolutely nothing else` :
@@ -672,8 +673,9 @@ Return ONLY a valid JSON array, no markdown:
 }]
 
 CRITICAL RULES:
-- correctIndex=0 (first choice is always correct — shuffled client-side)
-- All 4 choices must be in alphabetical order
+- Choices MUST be in strict alphabetical order (A, B, C, D)
+- correctIndex must be the actual index (0,1,2,3) of the correct answer in the alphabetically sorted array
+- Example: if correct answer is "import" and choices are ["export","import","report on","sell"], correctIndex=1
 - Use exactly "-------" (seven dashes) for the blank
 - The sentence context must strongly suggest the correct word's meaning
 - Wrong choices must be real words that do NOT fit the sentence context well
@@ -691,9 +693,8 @@ CRITICAL RULES:
   const parsed = JSON.parse(clean);
 
   return parsed.map(q=>{
-    const correct=q.choices[0], wrong=q.choices.slice(1).sort(()=>Math.random()-0.5);
-    const shuffled=[...wrong]; const at=Math.floor(Math.random()*4); shuffled.splice(at,0,correct);
-    return {...q, type, choices:shuffled, correctIndex:at, answerData:{explanation:q.explanation,synonyms:q.synonyms,sentences:q.sentences}};
+    // Choices are already in alphabetical order from AI, correctIndex is correct as-is
+    return {...q, type, choices:q.choices, correctIndex:q.correctIndex, answerData:{explanation:q.explanation,synonyms:q.synonyms,sentences:q.sentences}};
   });
 }
 
